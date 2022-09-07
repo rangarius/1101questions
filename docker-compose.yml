@@ -10,9 +10,10 @@ services:
       - '1337:1337'
     environment:
       - PARSE_ENABLE_CLOUD_CODE=yes
+      - ALLOW_EMPTY_PASSWORD=yes
     volumes:
       - 'parse_data:/bitnami'
-      - '/cloud:/opt/bitnami/parse/cloud'
+      - './cloud:/opt/bitnami/parse/cloud'
     depends_on:
       - mongodb
   parse-dashboard:
