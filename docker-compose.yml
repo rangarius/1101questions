@@ -11,7 +11,7 @@ services:
     parse:
         image: parseplatform/parse-server
         ports:
-            - 1337:1337
+            - 3000:1337
         links:
             - mongo
         environment:
