@@ -1,33 +1,40 @@
-version: '2'
+version: '3'
 services:
-  mongodb:
-    image: 'bitnami/mongodb:latest'
-    volumes:
-      - 'mongodb_data:/bitnami'
-  parse:
-    image: 'bitnami/parse:latest'
-    ports:
-      - '1337:1337'
-    environment:
-      - PARSE_ENABLE_CLOUD_CODE=yes
-      - ALLOW_EMPTY_PASSWORD=yes
-    volumes:
-      - 'parse_data:/bitnami'
-      - './cloud:/opt/bitnami/parse/cloud'
-    depends_on:
-      - mongodb
-  parse-dashboard:
-    image: 'bitnami/parse-dashboard:latest'
-    ports:
-      - '80:4040'
-    volumes:
-      - 'parse_dashboard_data:/bitnami'
-    depends_on:
-      - parse
+
+    mongo:
+        image: mongo
+        ports:
+            - 27017:27017
+        volumes:
+            - 'parse_db_data:/data/db'
+
+    parse:
+        image: parseplatform/parse-server
+        ports:
+            - 1337:1337
+        links:
+            - mongo
+        environment:
+            - PARSE_SERVER_APPLICATION_ID=yourappid
+            - PARSE_SERVER_MASTER_KEY=yourmasterkey
+            - PARSE_SERVER_DATABASE_URI=mongodb://mongo:27017/dev
+            - PARSE_SERVER_START_LIVE_QUERY_SERVER=1
+            - PARSE_SERVER_LIVE_QUERY={"classNames":["people","monitor"]}
+
+    parse-dashboard:
+      image: 'bitnami/parse-dashboard:latest'
+      ports:
+        - '80:4040'
+      volumes:
+        - 'parse_dashboard_data:/bitnami'
+      depends_on:
+        - parse
+      environment:
+        - PARSE_DASHBOARD_PARSE_APP_ID=yourappid
+        - PARSE_DASHBOARD_PARSE_APP_NAME=MyAPP
+        - PARSE_DASHBOARD_PARSE_MASTER_KEY=yourmasterkey
+        - PARSE_DASHBOARD_USERNAME=user
+        - PARSE_DASHBOARD_PASSWORD=bitnami
 volumes:
-  mongodb_data:
-    driver: local
-  parse_data:
-    driver: local
   parse_dashboard_data:
-    driver: local
+  parse_db_data:
