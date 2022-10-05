@@ -1,5 +1,7 @@
 {
-  "name": "ionic-app-base",
-  "integrations": {},
+  "name": "question_app",
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "vue"
 }
