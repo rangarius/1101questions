@@ -1,13 +1,18 @@
-##IMAGES - DOKU
-Just run :)
+# 1101 Questions
 
-##PARSE - DOKU
-https://docs.parseplatform.org
+## Run
 
+```sh
+docker compose up
+```
 
-##DASHBOARD LOCAL
-add 
-´´´sh
-127.0.0.1       parse
-´´´
-to /etc/hosts
+## Dashboard
+
+On Mac add `127.0.0.1 parse` to `/etc/hosts`
+
+Open <http://localhost>
+
+## Parse documentation
+
+<https://docs.parseplatform.org>
+
