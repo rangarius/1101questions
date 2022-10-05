@@ -11,7 +11,7 @@ services:
     parse:
         image: parseplatform/parse-server
         ports:
-            - 3000:1337
+            - 1337:1337
         links:
             - mongo
         environment:
@@ -20,7 +20,6 @@ services:
             - PARSE_SERVER_DATABASE_URI=mongodb://mongo:27017/dev
             - PARSE_SERVER_START_LIVE_QUERY_SERVER=1
             - PARSE_SERVER_LIVE_QUERY={"classNames":["people","monitor"]}
-
     parse-dashboard:
       image: 'bitnami/parse-dashboard:latest'
       ports:
@@ -35,6 +34,7 @@ services:
         - PARSE_DASHBOARD_PARSE_MASTER_KEY=yourmasterkey
         - PARSE_DASHBOARD_USERNAME=user
         - PARSE_DASHBOARD_PASSWORD=bitnami
+        - PARSE_DASHBOARD_PARSE_HOST=localhost
 volumes:
   parse_dashboard_data:
   parse_db_data:
