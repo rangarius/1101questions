@@ -12,6 +12,60 @@ export interface Question {
     parse_Obj?: Parse.Object
 }
 
+export class QuestionClass implements Question {
+    id?: string;
+    title: string;
+    description: string;
+    topics: any[];
+    answers: [];
+    right_answers: [];
+    parse_Obj?: Parse.Object;
+    updatedAt?: Date;
+    createdAt?: Date;
+
+    constructor() {
+        this.title = "";
+        this.description = "";
+        this.topics = [];
+        this.answers = [];
+        this.right_answers = [];
+    }
+
+    public fromParseObj(parseObj: Parse.Object) {
+        this.title = parseObj.get("title")
+        this.description = parseObj.get("description")
+        this.topics = parseObj.get("topics")
+        this.answers = parseObj.get("answers")
+        this.right_answers = parseObj.get("right_answers")
+        this.updatedAt = parseObj.updatedAt;
+        this.createdAt = parseObj.createdAt;
+        this.parse_Obj = parseObj
+        return this
+    }
+
+    public writeToDb(): Promise<Parse.Object> | undefined {
+        if(!this.parse_Obj) {
+            const Question = Parse.Object.extend("question");
+            this.parse_Obj = new Question;
+        }
+
+        this.parse_Obj!.set("title", this.title);
+        this.parse_Obj!.set("description", this.description);
+        this.parse_Obj!.set("topics", this.topics);
+        this.parse_Obj!.set("answers", this.answers);
+        this.parse_Obj!.set("right_answers", this.right_answers);
+        return this.parse_Obj?.save()
+    }
+
+    public removeFromDb(): Promise<Parse.Object> {
+        if(this.parse_Obj) {
+            return this.parse_Obj.destroy()
+        }
+        
+        return Promise.reject("Nothing to remove from DB")
+    }
+}
+
 class QuestionService {
     
 
@@ -24,42 +78,9 @@ class QuestionService {
         const query = new Parse.Query("question")
         return query.find().then(questions => {
             return questions.map(question =>{
-                return this.transform_parse_to_model(question)
+                return new QuestionClass().fromParseObj(question)
             })
         })
-    }
-
-    saveQuestion(question: Question): Promise<any> {
-        return this.transform_model_to_parse(question).save()
-    }
-
-    transform_parse_to_model(questionP: any): Question {
-        const question = {
-            id: questionP.id ?? null,
-            title: questionP.get("title"),
-            description: questionP.get("description"),
-            topics: questionP.get("topics"),
-            answers: questionP.get("answers"),
-            right_answers: questionP.get("right_answers"),
-            parse_Obj: questionP
-        }
-        return question
-
-    }
-
-    transform_model_to_parse(question: Question): Parse.Object {
-        if(!question.parse_Obj) {
-            const Question = Parse.Object.extend("question");
-            question.parse_Obj = new Question;
-        }
-        console.log(question.parse_Obj) 
-        question.parse_Obj!.set("title", question.title);
-        question.parse_Obj!.set("description", question.description);
-        question.parse_Obj!.set("topics", question.topics);
-        question.parse_Obj!.set("answers", question.answers);
-        question.parse_Obj!.set("right_answers", question.right_answers);
-        return question.parse_Obj!
-        
     }
 
 }
