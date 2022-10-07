@@ -142,7 +142,7 @@ export default defineComponent({
           }
         })
       }, error => {
-        alert("Error")
+        alert(error)
       })
     },
     formatDate(dateString: Date) {
