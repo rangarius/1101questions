@@ -9,7 +9,7 @@ services:
             - 'parse_db_data:/data/db'
 
     parse:
-        image: parseplatform/parse-server:5.3.0-alpha.27
+        image: parseplatform/parse-server
         ports:
             - 1986:1337
         links:
@@ -49,6 +49,7 @@ services:
         - PARSE_DASHBOARD_USERNAME=user
         - PARSE_DASHBOARD_PASSWORD=bitnami
         - PARSE_DASHBOARD_PARSE_HOST=localhost
+        - PARSE_DASHBOARD_PARSE_PORT_NUMBER=1986
 volumes:
   parse_dashboard_data:
   parse_db_data:
