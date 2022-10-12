@@ -69,7 +69,7 @@ export class QuestionClass implements Question {
 class QuestionService {
   constructor() {
     Parse.initialize("yourappid");
-    Parse.serverURL = "http://parse:1337/parse";
+    Parse.serverURL = "http://parse:1986/parse";
   }
 
   getQuestions(): Promise<Question[]> {
