@@ -1,7 +1,12 @@
 name: Ionic
 
-on: [pull_request, workflow_dispatch]
-
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'releases/*'
 defaults:
   run:
     working-directory: question_app
