@@ -9,17 +9,31 @@ services:
             - 'parse_db_data:/data/db'
 
     parse:
-        image: parseplatform/parse-server
+        image: parseplatform/parse-server:5.3.0-alpha.27
         ports:
             - 1337:1337
         links:
             - mongo
         environment:
-            - PARSE_SERVER_APPLICATION_ID=yourappid
-            - PARSE_SERVER_MASTER_KEY=yourmasterkey
-            - PARSE_SERVER_DATABASE_URI=mongodb://mongo:27017/dev
-            - PARSE_SERVER_START_LIVE_QUERY_SERVER=1
-            - PARSE_SERVER_LIVE_QUERY={"classNames":["people","monitor"]}
+            PARSE_SERVER_APPLICATION_ID: yourappid
+            PARSE_SERVER_MASTER_KEY: yourmasterkey
+            PARSE_SERVER_DATABASE_URI: mongodb://mongo:27017/dev
+            PARSE_SERVER_START_LIVE_QUERY_SERVER: 1
+            PARSE_SERVER_LIVE_QUERY: >
+              {
+                "classNames":
+                  [
+                    "question",
+                    "_User",
+                    "_Session"
+                  ]
+              }
+            PARSE_SERVER_MOUNT_GRAPHQL: "true"
+            PARSE_SERVER_CLOUD: /parse-server/cloud/main.js
+            PARSE_SERVER_MOUNT_PLAYGROUND: "true"
+            PARSE_SERVER_ALLOW_CLIENT_CLASS_CREATION: "false"
+        volumes:
+          - './parse-server/cloud/main.js:/parse-server/cloud/main.js'
     parse-dashboard:
       image: 'bitnami/parse-dashboard:latest'
       ports:
