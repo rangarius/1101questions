@@ -7,6 +7,8 @@ export interface Question {
   topics: any[];
   answers: [];
   right_answers: [];
+  createdAt?: Date;
+  updatedAt?: Date;
   parse_Obj?: Parse.Object;
 }
 

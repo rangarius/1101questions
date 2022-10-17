@@ -29,8 +29,8 @@
                 <h3> {{ question.title }} </h3>
                 <p> {{question.description}} </p>
               </ion-label>
-              <ion-button color="danger" slot="end" @click="removeQuestion(question)">
-                <ion-icon slot="icon-only" :name="trashBin"></ion-icon>
+              <ion-button slot="end" color="none" @click="removeQuestion(question)">
+                <ion-icon color="danger" slot="icon-only" :icon="trashBin"></ion-icon>
               </ion-button>
               </ion-item>
             </ion-list>
@@ -38,11 +38,11 @@
           <ion-col>
             <div class="submit-form">
               <ion-list>
-              <ion-item counter="true">
+              <ion-item counter=true>
                 <ion-label position="floating"> Fragetitel </ion-label>
                 <ion-input
-                  maxlength=50
                   type="text"
+                  maxlength=50
                   class="form-control"
                   id="title"
                   required
