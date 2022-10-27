@@ -25,9 +25,9 @@
                 :key="index"
               >
               <ion-label class="ion-text-wrap">
-                <p class="small"> {{formatDate(question.createdAt)}} </p>
+                <p class="small"> {{question.createdAt?.toDateString}} </p>
                 <h3> {{ question.title }} </h3>
-                <p> {{question.description}} </p>
+                <p> {{question.questionText}} </p>
               </ion-label>
               <ion-button slot="end" color="none" @click="removeQuestion(question)">
                 <ion-icon color="danger" slot="icon-only" :icon="trashBin"></ion-icon>
@@ -57,7 +57,7 @@
                   class="form-control"
                   id="description"
                   required
-                  v-model="question.description"
+                  v-model="question.questionText"
                   name="description"
                 ></ion-textarea>
               </ion-item>
@@ -96,7 +96,7 @@ import {
   IonIcon
 } from "@ionic/vue";
 import QuestionService from "../service/question_service";
-import { Question, QuestionClass } from "../service/question_service";
+import { QuestionClass} from "../service/interfaces";
 import dayjs from "dayjs";
 
 export default defineComponent({
@@ -104,7 +104,7 @@ export default defineComponent({
   components: { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonList, IonListHeader, IonButton, IonGrid, IonRow, IonCol, IonTextarea, IonInput,IonItem, IonLabel, IonIcon},
   data() {
     return {
-      questions: [] as Question[],
+      questions: [] as QuestionClass[],
       question: new QuestionClass()
     };
   },
@@ -118,7 +118,7 @@ export default defineComponent({
       if(!question) {
         throw("Nothing to save")
       }
-      question.writeToDb()!.then(() => {
+      question.writeToDb().then(() => {
         this.questions.push(this.question)
         this.question = new QuestionClass()
       }, error => {
