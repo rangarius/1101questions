@@ -44,9 +44,9 @@
                   <ion-textarea class="form-control" id="description" required v-model="question.questionText"
                     name="description"></ion-textarea>
                 </ion-item>
-                <ion-segment value="buttons">
-                  <ion-segment-button value="default">
-                    <ion-label>Default</ion-label>
+                <ion-segment value="buttons" v-on:ion-change="changeAnswerType($event.detail)">
+                  <ion-segment-button value="Person">
+                    <ion-label>Person</ion-label>
                   </ion-segment-button>
                   <ion-segment-button value="segment">
                     <ion-label>Segment</ion-label>
@@ -55,6 +55,9 @@
                     <ion-label>Button</ion-label>
                   </ion-segment-button>
                 </ion-segment>
+                <ion-item>
+
+                </ion-item>
                 <ion-button position="center" @click="saveQuestion(question)">
                   Submit
                 </ion-button>
@@ -88,10 +91,11 @@ import {
   IonLabel,
   IonIcon,
   IonSegment,
-  IonSegmentButton
+  IonSegmentButton,
+SegmentChangeEventDetail
 } from "@ionic/vue";
 import QuestionService from "../service/question_service";
-import { QuestionClass, AnswerType } from "../service/interfaces";
+import { QuestionClass, AnswerType, AnswerType_Person, AnswerType_Class } from "../service/interfaces";
 import dayjs from "dayjs";
 
 export default defineComponent({
@@ -119,7 +123,9 @@ export default defineComponent({
   data() {
     return {
       questions: [] as QuestionClass[],
-      question: new QuestionClass()
+      question: new QuestionClass(),
+      buttons: "default",
+      answer: new AnswerType_Class()
     };
   },
   setup() {
@@ -139,6 +145,15 @@ export default defineComponent({
         alert(error)
       });
 
+    },
+    changeAnswerType(event: SegmentChangeEventDetail) {
+      if(event.value) {
+        this.answer = new AnswerType_Class().createAnswerType(event.value)
+        console.log("Buttons is: ", this.buttons)
+        console.log(this.answer)
+        this.question.answer = this.answer
+      }
+     
     },
     refreshQuestions() {
       QuestionService.getQuestions().then((questions) => {
@@ -167,6 +182,7 @@ export default defineComponent({
   mounted() {
     this.refreshQuestions()
     this.question.withAnswerType(AnswerType.Person);
+    this.answer = new AnswerType_Class().createAnswerType("Person")
   },
 });
 </script>

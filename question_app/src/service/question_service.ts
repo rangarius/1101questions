@@ -8,7 +8,7 @@ class QuestionService {
   }
 
   getQuestions(): Promise<QuestionClass[]> {
-    const query = new Parse.Query("question");
+    const query = new Parse.Query("Question");
     return query.find().then((questions:Parse.Object[]) => {
       return questions.map((question) => {
         return new QuestionClass().fromParseObj(question);

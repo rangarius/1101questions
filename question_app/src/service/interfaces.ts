@@ -31,12 +31,24 @@ export enum AnswerType {
   export class AnswerType_Class {
     parseObj: Parse.Object;
 
+
     constructor() {
       this.parseObj = Parse.Object.extend("")
     }
+
+    createAnswerType(type: string): AnswerType_Class{
+      if(type === "Person") {
+        return new AnswerType_Person()
+      }
+      return new AnswerType_Class()
+    }
+
+    saveToDB(): Promise<Parse.Object> {
+      return this.parseObj.save()
+    }
   }
 
-  export class AnswerType_Person implements AnswerType_Class {
+  export class AnswerType_Person extends AnswerType_Class {
     id?: string;
     name: string;
     fictional: boolean;
@@ -49,6 +61,7 @@ export enum AnswerType {
     parseObj: Parse.Object;
 
     constructor() {
+      super()
       this.name = "";
       this.designation = [];
       this.fictional= false;
@@ -85,7 +98,7 @@ export enum AnswerType {
 
     }
 
-    public saveToDB(): Promise<void> {
+    public saveToDB(): Promise<Parse.Object> {
         this.parseObj.set("name", this.name);
         this.parseObj.set("fictional", this.fictional);
         this.parseObj.set("timeFrom", this.timeFrom);
@@ -94,8 +107,8 @@ export enum AnswerType {
         this.parseObj.set("tags", this.tags.map(el => el.parseObj));
         this.parseObj.set("questions", this.questions.map(el => el.parse_Obj));
   
-        return this.parseObj.save().then(() => {
-          return 
+        return this.parseObj.save().then((answer) => {
+          return answer
         }, error => {
           return error
         })
@@ -150,7 +163,10 @@ export enum AnswerType {
       this.parse_Obj.set("title", this.title);
       this.parse_Obj.set("questionText", this.questionText);
       this.parse_Obj.set("tags", this.tags.map(el => el.parseObj));
-      this.parse_Obj.set("answer", this.answer);
+      if(this.answer) {
+        this.answer.saveToDB().then((answer) =>
+        this.parse_Obj.set("answer", answer) )
+      }
       //TODO: Rework for Current User
       this.parse_Obj.set("author", null);
       return this.parse_Obj.save();
