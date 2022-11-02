@@ -30,14 +30,17 @@ export enum AnswerType {
 
   export class AnswerType_Class {
     parseObj: Parse.Object;
+    class_type?: "Person" | "Place" | "Thing" | "Event" | "Timespan" | "Date";
 
 
     constructor() {
       this.parseObj = Parse.Object.extend("")
+      
     }
 
     createAnswerType(type: string): AnswerType_Class{
       if(type === "Person") {
+        this.class_type = "Person";
         return new AnswerType_Person()
       }
       return new AnswerType_Class()
@@ -71,6 +74,7 @@ export enum AnswerType {
       this.dateTimeFormat = DateTimeFormat.epoch;
       this.questions = [];
       this.tags = [];
+      this.class_type = "Person"
       this.parseObj = Parse.Object.extend("Person")
     }
 

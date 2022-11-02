@@ -44,19 +44,19 @@
                   <ion-textarea class="form-control" id="description" required v-model="question.questionText"
                     name="description"></ion-textarea>
                 </ion-item>
-                <ion-segment value="buttons" v-on:ion-change="changeAnswerType($event.detail)">
+                <ion-segment v-on:ion-change="changeAnswerType($event)">
                   <ion-segment-button value="Person">
                     <ion-label>Person</ion-label>
                   </ion-segment-button>
                   <ion-segment-button value="segment">
                     <ion-label>Segment</ion-label>
                   </ion-segment-button>
-                  <ion-segment-button value="buttons">
+                  <ion-segment-button value="asdas">
                     <ion-label>Button</ion-label>
                   </ion-segment-button>
                 </ion-segment>
-                <ion-item>
-
+                <ion-item v-if="answer.class_type === 'Person'">
+                  <ion-label> PErson </ion-label>
                 </ion-item>
                 <ion-button position="center" @click="saveQuestion(question)">
                   Submit
@@ -97,6 +97,7 @@ SegmentChangeEventDetail
 import QuestionService from "../service/question_service";
 import { QuestionClass, AnswerType, AnswerType_Person, AnswerType_Class } from "../service/interfaces";
 import dayjs from "dayjs";
+import { IonSegmentCustomEvent } from "@ionic/core";
 
 export default defineComponent({
   name: "Tab1Page",
@@ -124,7 +125,6 @@ export default defineComponent({
     return {
       questions: [] as QuestionClass[],
       question: new QuestionClass(),
-      buttons: "default",
       answer: new AnswerType_Class()
     };
   },
@@ -146,12 +146,14 @@ export default defineComponent({
       });
 
     },
-    changeAnswerType(event: SegmentChangeEventDetail) {
-      if(event.value) {
-        this.answer = new AnswerType_Class().createAnswerType(event.value)
-        console.log("Buttons is: ", this.buttons)
+    changeAnswerType(event: IonSegmentCustomEvent<SegmentChangeEventDetail>) {
+      console.log(event)
+      if(event.detail.value && typeof event.detail.value == "string" ) {
+        this.answer = new AnswerType_Class().createAnswerType(event.detail.value)
         console.log(this.answer)
-        this.question.answer = this.answer
+        //this.question.answer = this.answer
+      } else {
+        this.answer = new AnswerType_Class()
       }
      
     },
