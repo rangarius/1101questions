@@ -18,53 +18,49 @@
               <ion-list-header>
                 <h4>Question List</h4>
               </ion-list-header>
-              <ion-item
-                class="list-group-item"
-                
-                v-for="(question, index) in questions"
-                :key="index"
-              >
-              <ion-label class="ion-text-wrap">
-                <p class="small"> {{formatDate(question.createdAt)}} </p>
-                <h3> {{ question.title }} </h3>
-                <p> {{question.description}} </p>
-              </ion-label>
-              <ion-button color="danger" slot="end" @click="removeQuestion(question)">
-                <ion-icon slot="icon-only" :name="trashBin"></ion-icon>
-              </ion-button>
+              <ion-item class="list-group-item" v-for="(question, index) in questions" :key="index">
+                <ion-label class="ion-text-wrap">
+                  <p class="small"> {{ question.createdAt?.toDateString }} </p>
+                  <h3> {{ question.title }} </h3>
+                  <p> {{ question.questionText }} </p>
+                </ion-label>
+                <ion-button slot="end" color="none" @click="removeQuestion(question)">
+                  <ion-icon color="danger" slot="icon-only" :icon="trashBin"></ion-icon>
+                </ion-button>
               </ion-item>
             </ion-list>
           </ion-col>
           <ion-col>
             <div class="submit-form">
               <ion-list>
-              <ion-item counter="true">
-                <ion-label position="floating"> Fragetitel </ion-label>
-                <ion-input
-                  maxlength=50
-                  type="text"
-                  class="form-control"
-                  id="title"
-                  required
-                  v-model="question.title"
-                  name="title"
-                />
-              </ion-item>
+                <ion-item counter="true">
+                  <ion-label position="floating"> Fragetitel </ion-label>
+                  <ion-input type="text" maxlength=50 class="form-control" id="title" required v-model="question.title"
+                    name="title" />
+                </ion-item>
 
-              <ion-item>
-                <ion-label position="floating"> Fragetext </ion-label>
-                <ion-textarea
-                  class="form-control"
-                  id="description"
-                  required
-                  v-model="question.description"
-                  name="description"
-                ></ion-textarea>
-              </ion-item>
-              
-              <ion-button position="center" @click="saveQuestion(question)">
-                Submit
-              </ion-button>
+                <ion-item>
+                  <ion-label position="floating"> Fragetext </ion-label>
+                  <ion-textarea class="form-control" id="description" required v-model="question.questionText"
+                    name="description"></ion-textarea>
+                </ion-item>
+                <ion-segment v-on:ion-change="changeAnswerType($event)">
+                  <ion-segment-button value="Person">
+                    <ion-label>Person</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="segment">
+                    <ion-label>Segment</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="asdas">
+                    <ion-label>Button</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
+                <ion-item v-if="answer.class_type === 'Person'">
+                  <ion-label> PErson </ion-label>
+                </ion-item>
+                <ion-button position="center" @click="saveQuestion(question)">
+                  Submit
+                </ion-button>
               </ion-list>
             </div>
           </ion-col>
@@ -93,19 +89,43 @@ import {
   IonInput,
   IonItem,
   IonLabel,
-  IonIcon
+  IonIcon,
+  IonSegment,
+  IonSegmentButton,
+SegmentChangeEventDetail
 } from "@ionic/vue";
 import QuestionService from "../service/question_service";
-import { Question, QuestionClass } from "../service/question_service";
+import { QuestionClass, AnswerType, AnswerType_Person, AnswerType_Class } from "../service/interfaces";
 import dayjs from "dayjs";
+import { IonSegmentCustomEvent } from "@ionic/core";
 
 export default defineComponent({
   name: "Tab1Page",
-  components: { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonList, IonListHeader, IonButton, IonGrid, IonRow, IonCol, IonTextarea, IonInput,IonItem, IonLabel, IonIcon},
+  components: { 
+    IonHeader, 
+    IonToolbar, 
+    IonTitle, 
+    IonContent, 
+    IonPage, 
+    IonList, 
+    IonListHeader, 
+    IonButton, 
+    IonGrid, 
+    IonRow, 
+    IonCol, 
+    IonTextarea, 
+    IonInput, 
+    IonItem, 
+    IonLabel, 
+    IonIcon,
+    IonSegment,
+    IonSegmentButton
+   },
   data() {
     return {
-      questions: [] as Question[],
-      question: new QuestionClass()
+      questions: [] as QuestionClass[],
+      question: new QuestionClass(),
+      answer: new AnswerType_Class()
     };
   },
   setup() {
@@ -115,16 +135,27 @@ export default defineComponent({
   },
   methods: {
     saveQuestion(question: QuestionClass) {
-      if(!question) {
-        throw("Nothing to save")
+      if (!question) {
+        throw ("Nothing to save")
       }
-      question.writeToDb()!.then(() => {
+      question.writeToDb().then(() => {
         this.questions.push(this.question)
         this.question = new QuestionClass()
       }, error => {
         alert(error)
       });
-      
+
+    },
+    changeAnswerType(event: IonSegmentCustomEvent<SegmentChangeEventDetail>) {
+      console.log(event)
+      if(event.detail.value && typeof event.detail.value == "string" ) {
+        this.answer = new AnswerType_Class().createAnswerType(event.detail.value)
+        console.log(this.answer)
+        //this.question.answer = this.answer
+      } else {
+        this.answer = new AnswerType_Class()
+      }
+     
     },
     refreshQuestions() {
       QuestionService.getQuestions().then((questions) => {
@@ -132,12 +163,12 @@ export default defineComponent({
       });
     },
     removeQuestion(question: QuestionClass) {
-      if(!question) {
-        throw("Nothing to remove")
+      if (!question) {
+        throw ("Nothing to remove")
       }
       question.removeFromDb().then(() => {
         this.questions.filter((item, index) => {
-          if(item === question) {
+          if (item === question) {
             this.questions.splice(index, 1)
           }
         })
@@ -152,6 +183,8 @@ export default defineComponent({
   },
   mounted() {
     this.refreshQuestions()
+    this.question.withAnswerType(AnswerType.Person);
+    this.answer = new AnswerType_Class().createAnswerType("Person")
   },
 });
 </script>
