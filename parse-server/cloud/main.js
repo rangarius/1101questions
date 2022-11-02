@@ -2,7 +2,6 @@ const ClassesInUse = [
     "_User",
     "_Session",
     "_Role",
-    "Answer",
     "Question",
     "Person",
     "Tag"
@@ -25,8 +24,7 @@ Parse.Cloud.job("seedDataBase", (request) =>  {
       await purgeUnusedClasses(request)
       await setup_tags_schema(request)
       await setup_question_schema(request)
-      await setup_answer_schema(request)
-      await setup_answer_types_schema(request)
+      await setup_answer_types_person_schema(request)
       await setup_designation_schema(request)
   }
 
@@ -71,9 +69,9 @@ Parse.Cloud.job("seedDataBase", (request) =>  {
         default: ""
     })
     questionSchema.addArray("tags")
-    questionSchema.addPointer("answer", "Answer", {
+    questionSchema.addString("answerType", {
         required: true,
-        default: null
+        default: "Person"
     })
 
     questionSchema.addPointer("author", "_User", {
@@ -89,29 +87,16 @@ Parse.Cloud.job("seedDataBase", (request) =>  {
   });
 }
 
-  async function setup_answer_schema(request) {
-    const answerSchema = new Parse.Schema("Answer")
-    answerSchema.addString("answerType", {
-        required: true,
-        default: ""
-    })
-    answerSchema.addString("answerId", {
-        required: true,
-        default: ""
-    })
-    answerSchema.get().then(() => {
-        request.message("Updated Schema")
-        return answerSchema.update()
-    }, () => {
-        request.message("Added Schema")
-        return answerSchema.save()
-    })
-  }
 
-  async function setup_answer_types_schema(request) {
+
+  async function setup_answer_types_person_schema(request) {
     const answerTypePerson = new Parse.Schema("Person");
     answerTypePerson.addString("name", {
         required: true,
+        default: ""
+    })
+    answerTypePerson.addString("description", {
+        required: false,
         default: ""
     })
     answerTypePerson.addArray("designation")

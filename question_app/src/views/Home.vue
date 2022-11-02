@@ -55,9 +55,21 @@
                     <ion-label>Button</ion-label>
                   </ion-segment-button>
                 </ion-segment>
-                <ion-item v-if="answer.class_type === 'Person'">
-                  <ion-label> PErson </ion-label>
+                <div v-if="answer.class_type === 'Person'">
+                <ion-item>
+                  <ion-label position="floating"> Name </ion-label>
+                  <ion-input required v-model="answer.name" type="text"></ion-input>
                 </ion-item>
+                <ion-item>
+                  <ion-label> Fiktiv </ion-label>
+                  <ion-toggle slot="end" v-model="answer.fictional"></ion-toggle>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="floating"> Erklärung </ion-label>
+                  <ion-textarea class="form-control" id="description" v-model="answer.description"></ion-textarea>
+                </ion-item>
+                </div>
+
                 <ion-button position="center" @click="saveQuestion(question)">
                   Submit
                 </ion-button>
