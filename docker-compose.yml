@@ -23,7 +23,9 @@ services:
               {
                 "classNames":
                   [
-                    "question",
+                    "Question",
+                    "Answer",
+                    "Tag",
                     "_User",
                     "_Session"
                   ]

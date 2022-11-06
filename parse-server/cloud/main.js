@@ -4,7 +4,6 @@ const ClassesInUse = [
     "_Role",
     "Answer",
     "Question",
-    "Person",
     "Tag"
 ]
 
@@ -75,6 +74,7 @@ Parse.Cloud.job("seedDataBase", (request) =>  {
         required: true,
         default: null
     })
+    questionSchema.addCollection("relatedQuestions", "Question")
 
     questionSchema.addPointer("author", "_User", {
         required: false
@@ -91,61 +91,25 @@ Parse.Cloud.job("seedDataBase", (request) =>  {
 
   async function setup_answer_schema(request) {
     const answerSchema = new Parse.Schema("Answer")
+    answerSchema.addString("text", {
+        required: true,
+        default: ""
+    })
     answerSchema.addString("answerType", {
         required: true,
         default: ""
     })
-    answerSchema.addString("answerId", {
-        required: true,
-        default: ""
-    })
+
+    answerSchema.addPointer("author", "_User");
+
+    answerSchema.addCollection("questions", "Question");
+
     answerSchema.get().then(() => {
         request.message("Updated Schema")
         return answerSchema.update()
     }, () => {
         request.message("Added Schema")
         return answerSchema.save()
-    })
-  }
-
-  async function setup_answer_types_schema(request) {
-    const answerTypePerson = new Parse.Schema("Person");
-    answerTypePerson.addString("name", {
-        required: true,
-        default: ""
-    })
-    answerTypePerson.addArray("designation")
-    answerTypePerson.addBoolean("fictional", {
-        required: true,
-        default: false
-    })
-    answerTypePerson.addArray("questions")
-    answerTypePerson.addArray("tags")
-    answerTypePerson.addDate("timeFrom")
-    answerTypePerson.addDate("timeTo")
-    answerTypePerson.addString("dateFormat")
-    answerTypePerson.get().then(() => {
-        request.message("Updated Schema")
-        return answerTypePerson.update()
-    }, () => {
-        request.message("Added Schema")
-        return answerTypePerson.save()
-    })
-  }
-
-  async function setup_designation_schema(request) {
-    const designationSchema = new Parse.Schema("Designation")
-    designationSchema.addString("name", {
-        required: true,
-        default: ""
-    })
-
-    designationSchema.get().then(() => {
-        request.message("Updated Schema")
-        return designationSchema.update()
-    }, () => {
-        request.message("Added Schema")
-        return designationSchema.save()
     })
   }
 

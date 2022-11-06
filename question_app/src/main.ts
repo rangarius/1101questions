@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
+import stateProvider  from "@/service/stateProvider";
 
 import { IonicVue } from '@ionic/vue';
 
@@ -31,4 +32,5 @@ const app = createApp(App)
   
 router.isReady().then(() => {
   app.mount('#app');
+  stateProvider.bootstrap()
 });

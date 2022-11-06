@@ -23,87 +23,42 @@ export enum AnswerType {
     "Date"
   }
   
-  export interface _AnswerType {
-    answerId: string,
-    answerType: AnswerType
-  }
 
-  export class AnswerType_Class {
-    parseObj: Parse.Object;
-
-
-    constructor() {
-      this.parseObj = Parse.Object.extend("")
-    }
-
-    createAnswerType(type: string): AnswerType_Class{
-      if(type === "Person") {
-        return new AnswerType_Person()
-      }
-      return new AnswerType_Class()
-    }
-
-    saveToDB(): Promise<Parse.Object> {
-      return this.parseObj.save()
-    }
-  }
-
-  export class AnswerType_Person extends AnswerType_Class {
+  export class AnswerClass {
     id?: string;
-    name: string;
-    fictional: boolean;
-    designation: string[];
+    text: string;
     questions: QuestionClass[];
-    timeFrom?: string;
-    timeTo?: string;
-    dateTimeFormat?: DateTimeFormat
     tags: TagClass[];
     parseObj: Parse.Object;
+    // TODO: Implement Author
+    author: any;
 
     constructor() {
-      super()
-      this.name = "";
-      this.designation = [];
-      this.fictional= false;
+      this.text = ""
       this.id = "";
-      this.timeFrom = ""
-      this.timeTo = "";
-      this.dateTimeFormat = DateTimeFormat.epoch;
       this.questions = [];
       this.tags = [];
-      this.parseObj = Parse.Object.extend("Person")
+      this.parseObj = Parse.Object.extend("Answer");
+      this.author = ""
+
     }
 
-    public fromParseObj(parseObj: Parse.Object): Promise<AnswerType_Person | Error> {
-      return parseObj.fetchWithInclude(["questions", "designation", "tags"]).then(parseObj => {
-        this.name = parseObj.get("name");
-        this.fictional= parseObj.get("fictonal");
-        this.designation = parseObj.get("designation");
-        this.id = parseObj.id;
-        this.timeFrom = parseObj.get("timeFrom")
-        this.timeTo = parseObj.get("timeTo");
-        this.dateTimeFormat = parseObj.get("format");
-        parseObj.get("tags").forEach((tag: Parse.Object) => {
-          this.tags.push(new TagClass(tag.get("text"), tag.id));
-        });
-        this.parseObj = parseObj;
-        parseObj.get("questions").forEach((question: Parse.Object) => {
-          this.questions.push(new QuestionClass().fromParseObj(question))
-        });
+    public fromParseObj(parseObj: Parse.Object): Promise<AnswerClass> {
+      return parseObj.fetchWithInclude(["questions", "tags"]).then(obj => {
+        this.text = obj.get("text");
+        this.id = obj.id;
+        for (const questionObj of obj.get("questions") as Parse.Object[]) {
+          this.questions.push( new QuestionClass().fromParseObj(questionObj));
+        }
+        for (const tagObj of obj.get("tags") as Parse.Object[]) {
+          this.tags.push( new TagClass(tagObj.get("text"), tagObj.id));
+        }
         return this
-      }, (error: Error) => {
-        alert(error)
-        return error
       })
-
     }
 
     public saveToDB(): Promise<Parse.Object> {
-        this.parseObj.set("name", this.name);
-        this.parseObj.set("fictional", this.fictional);
-        this.parseObj.set("timeFrom", this.timeFrom);
-        this.parseObj.set("timeTo", this.timeTo);
-        this.parseObj.set("format", this.dateTimeFormat);
+        this.parseObj.set("text", this.text);
         this.parseObj.set("tags", this.tags.map(el => el.parseObj));
         this.parseObj.set("questions", this.questions.map(el => el.parse_Obj));
   
@@ -121,8 +76,8 @@ export enum AnswerType {
     title: string;
     questionText: string;
     tags: TagClass[];
-    answerType: _AnswerType;
-    answer?: AnswerType_Class;
+    answer: AnswerClass;
+    relatedAnswers: AnswerClass[];
     author?: any;
     parse_Obj: Parse.Object;
     updatedAt?: Date;
@@ -132,12 +87,9 @@ export enum AnswerType {
       this.title = "";
       this.questionText = "";
       this.tags = [];
-      this.answerType = {
-        answerId: "",
-        answerType: AnswerType.Person
-      };
       this.parse_Obj = new Parse.Object("Question")
-      this.answer = undefined;
+      this.answer = new AnswerClass();
+      this.relatedAnswers = [];
       this.author = undefined;
       this.updatedAt = undefined;
       this.createdAt = undefined;
@@ -147,11 +99,20 @@ export enum AnswerType {
     public fromParseObj(parseObj: Parse.Object) {
       this.title = parseObj.get("title");
       this.questionText = parseObj.get("questionText");
-      const tags = parseObj.get("tags") as Parse.Object[]
-      this.tags = tags.map((el):TagClass => {
-        return new TagClass("").fromDBObj(el)
-      })
-      this.answerType = parseObj.get("answer");
+      if(parseObj.get("tags")) {
+        const tags = parseObj.get("tags")
+        if(tags.length > 0) {
+          this.tags = tags.map((el:Parse.Object) => {
+            return new TagClass("").fromDBObj(el)
+          })
+        }
+      }
+
+
+      this.answer.fromParseObj(parseObj.get("answer")).then(answer => {
+        this.answer = answer
+      });
+
       this.updatedAt = parseObj.updatedAt;
       this.createdAt = parseObj.createdAt;
       this.parse_Obj = parseObj;
@@ -178,15 +139,6 @@ export enum AnswerType {
       }
   
       return Promise.reject("Nothing to remove from DB");
-    }
-
-    public withAnswerType(answerType: AnswerType) {
-      this.answerType = {
-        answerId: "",
-        answerType: answerType
-      }
-      //TODO: Rework From Switch to Reflection
-      this.answer = new AnswerType_Person()
     }
   }
 
