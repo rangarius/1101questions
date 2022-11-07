@@ -30,6 +30,7 @@ export enum AnswerType {
     questions: QuestionClass[];
     tags: TagClass[];
     parseObj: Parse.Object;
+    answerType: AnswerType | "Person" | "Thing" | "Event" | "Timespan" | "Date";
     // TODO: Implement Author
     author: any;
 
@@ -40,6 +41,7 @@ export enum AnswerType {
       this.tags = [];
       this.parseObj = Parse.Object.extend("Answer");
       this.author = ""
+      this.answerType = AnswerType.Person
 
     }
 
@@ -47,6 +49,7 @@ export enum AnswerType {
       return parseObj.fetchWithInclude(["questions", "tags"]).then(obj => {
         this.text = obj.get("text");
         this.id = obj.id;
+        this.answerType = AnswerType[obj.get("answerType") as keyof typeof AnswerType]
         for (const questionObj of obj.get("questions") as Parse.Object[]) {
           this.questions.push( new QuestionClass().fromParseObj(questionObj));
         }
@@ -61,6 +64,8 @@ export enum AnswerType {
         this.parseObj.set("text", this.text);
         this.parseObj.set("tags", this.tags.map(el => el.parseObj));
         this.parseObj.set("questions", this.questions.map(el => el.parse_Obj));
+
+        this.parseObj.set("answerType", this.answerType.toString())
   
         return this.parseObj.save().then((answer) => {
           return answer
@@ -125,9 +130,12 @@ export enum AnswerType {
       this.parse_Obj.set("questionText", this.questionText);
       this.parse_Obj.set("tags", this.tags.map(el => el.parseObj));
       if(this.answer) {
+        console.log("THIS ANSER:", this.answer)
+        this.answer.parseObj.set("questions", [this.parse_Obj])
         this.answer.saveToDB().then((answer) =>
         this.parse_Obj.set("answer", answer) )
       }
+
       //TODO: Rework for Current User
       this.parse_Obj.set("author", null);
       return this.parse_Obj.save();
