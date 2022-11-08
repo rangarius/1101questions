@@ -13,6 +13,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@types/parse": "^2.18.18"
+    "@types/parse": "^2.18.18",
+    "babel-plugin-transform-remove-imports": "^1.7.0"
   }
 }

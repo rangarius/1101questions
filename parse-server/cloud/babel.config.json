@@ -4,11 +4,20 @@
         [
           "@babel/preset-typescript",
           {
-            "onlyRemoveTypeImports": false
+            "onlyRemoveTypeImports": true,
+            "moduleResolution": "node",
+            "importsNotUsedAsValues":"remove"
           }
         ]
 
         
       ],
+      "plugins": [
+        [
+          "babel-plugin-transform-remove-imports", {
+            "test": "parse"
+          }
+        ]
+      ]
     
   }

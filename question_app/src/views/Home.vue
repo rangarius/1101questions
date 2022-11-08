@@ -21,10 +21,12 @@
               <ion-item class="list-group-item" v-for="(question, index) in questions" :key="index">
                 <ion-label class="ion-text-wrap">
                   <p class="small"> {{ question.createdAt?.toDateString() }} </p>
+                  <p><small>ID: </small> {{question.id}}</p>
                   <h3> {{ question.title }} </h3>
                   <p> {{ question.questionText }} </p>
+                  <p><strong>Antwort: </strong> {{question.answer.text}}</p>
                 </ion-label>
-                <ion-button slot="end" color="none" @click="removeQuestion(question)">
+                <ion-button slot="end" color="none" @click="removeQuestion(question.id)">
                   <ion-icon color="danger" slot="icon-only" :icon="trashBin"></ion-icon>
                 </ion-button>
               </ion-item>
@@ -70,9 +72,15 @@
 
                 <ion-item>
                   <ion-label position="floating"> Antwort </ion-label>
-                  <ion-textarea class="form-control" id="description" required v-model="answer.text" name="description">
+                  <ion-textarea id="answer" class="form-control" required v-model="answer.text" name="description" @input="getAnswerByString($event.target.value, answer.answerType)">
                   </ion-textarea>
+                  <ion-list v-if="filteredAnswers.length > 0">
+                    <ion-item v-for="answer of filteredAnswers" v-bind:key="answer.id">
+                      <ion-label @click="setAnswer(answer)"> {{answer.text}}</ion-label>
+                    </ion-item>
+                  </ion-list>
                 </ion-item>
+
               </ion-list>
 
               <ion-list class="ion-margin-top">
@@ -143,7 +151,7 @@ import {
   IonIcon,
   IonRadio,
   IonRadioGroup,
-  IonChip,
+  IonChip
 } from "@ionic/vue";
 import stateProvider from "@/service/stateProvider";
 import { QuestionClass, AnswerType, AnswerClass } from "../service/interfaces";
@@ -170,7 +178,7 @@ export default defineComponent({
     IonIcon,
     IonRadio,
     IonRadioGroup,
-    IonChip,
+    IonChip
   },
   data() {
     return {
@@ -178,7 +186,8 @@ export default defineComponent({
       question: new QuestionClass(),
       answer: new AnswerClass(),
       answer_types: Object.entries(AnswerClass),
-      wrongAnswers: [] as AnswerClass[]
+      wrongAnswers: [] as AnswerClass[],
+      filteredAnswers: [] as AnswerClass[]
 
     };
   },
@@ -203,29 +212,38 @@ export default defineComponent({
       question.writeToDb().then(() => {
         this.questions.push(this.question)
         this.question = new QuestionClass()
+        this.answer = question.answer
       }, error => {
         alert(error)
       });
 
     },
+    getAnswerByString(srcString: string, answerType?: AnswerType | string) {
+      if(srcString.length < 3 ) {
+        this.filteredAnswers = [];
+        return
+      }
+      console.log("Search triggered")
+
+      this.filteredAnswers = stateProvider.filterAnswers(srcString.toLowerCase(), answerType)
+      console.log("found: ", this.filteredAnswers)
+      return
+    },
+    setAnswer(anwser: AnswerClass) {
+      this.answer = anwser
+    },
+    removeQuestion(id?: string) {
+      if(!id) {
+        return
+      } 
+      stateProvider.removeQuestion(id).then(() => null, error => {
+        alert(error)
+      })
+    },
     addWrongAnswer() {
       console.log("Adding wrong Answer")
       this.wrongAnswers.push(new AnswerClass())
       console.log(this.wrongAnswers)
-    },
-    removeQuestion(question: QuestionClass) {
-      if (!question) {
-        throw ("Nothing to remove")
-      }
-      question.removeFromDb().then(() => {
-        this.questions.filter((item, index) => {
-          if (item === question) {
-            this.questions.splice(index, 1)
-          }
-        })
-      }, error => {
-        alert(error)
-      })
     },
     formatDate(dateString: Date) {
       const date = dayjs(dateString)

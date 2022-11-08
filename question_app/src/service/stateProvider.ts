@@ -1,4 +1,4 @@
-import { QuestionClass, AnswerClass, TagClass } from './interfaces';
+import { QuestionClass, AnswerClass, TagClass, AnswerType } from './interfaces';
 import Parse from "parse";
 import { reactive } from "vue"
 
@@ -156,6 +156,26 @@ export default reactive({
 
     })
 
+
+
+    },
+
+    removeQuestion(id: string) {
+        const index = this.questions.findIndex(el => el.id == id)
+        if(!index) {
+            throw("Nothing to delete")
+        }
+        return this.questions[index].parse_Obj.destroy()
+    },
+
+    filterAnswers(srcString: string, answerType?: AnswerType | string): AnswerClass[] {
+        const string_filter = this.answers.filter(el => el.text.toLowerCase().includes(srcString));
+        
+        if(answerType) {
+            return string_filter.filter(el => el.answerType == answerType)
+        }
+        return string_filter
+        
     }
 })
 

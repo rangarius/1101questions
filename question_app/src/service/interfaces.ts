@@ -39,7 +39,7 @@ export enum AnswerType {
       this.id = "";
       this.questions = [];
       this.tags = [];
-      this.parseObj = Parse.Object.extend("Answer");
+      this.parseObj = new Parse.Object("Answer")
       this.author = ""
       this.answerType = AnswerType.Person
 
@@ -102,6 +102,7 @@ export enum AnswerType {
   
 
     public fromParseObj(parseObj: Parse.Object) {
+      this.id = parseObj.id;
       this.title = parseObj.get("title");
       this.questionText = parseObj.get("questionText");
       if(parseObj.get("tags")) {
@@ -113,18 +114,21 @@ export enum AnswerType {
         }
       }
 
-
-      this.answer.fromParseObj(parseObj.get("answer")).then(answer => {
-        this.answer = answer
-      });
+      parseObj.get("answer").fetch().then((res: Parse.Object) => {
+        this.answer.fromParseObj(res)
+      })
+      // parseObj.get("answer").then((answer: Parse.Object) => {
+      //   this.answer.fromParseObj(answer)
+      // });
 
       this.updatedAt = parseObj.updatedAt;
       this.createdAt = parseObj.createdAt;
       this.parse_Obj = parseObj;
+      console.log(this)
       return this;
     }
   
-    public writeToDb(): Promise<Parse.Object | undefined> {
+    public async writeToDb(): Promise<Parse.Object | undefined> {
   
       this.parse_Obj.set("title", this.title);
       this.parse_Obj.set("questionText", this.questionText);
@@ -132,8 +136,8 @@ export enum AnswerType {
       if(this.answer) {
         console.log("THIS ANSER:", this.answer)
         this.answer.parseObj.set("questions", [this.parse_Obj])
-        this.answer.saveToDB().then((answer) =>
-        this.parse_Obj.set("answer", answer) )
+        const answer = await this.answer.saveToDB()
+        this.parse_Obj.set("answer", answer)
       }
 
       //TODO: Rework for Current User
